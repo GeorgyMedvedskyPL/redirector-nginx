@@ -1,0 +1,82 @@
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+  }
+  h1 {
+    color: #333;
+  }
+  textarea,
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  button:hover {
+    background-color: #218838;
+  }
+  .copy-button {
+    background-color: #007bff;
+  }
+  .copy-button:hover {
+    background-color: #0056b3;
+  }
+  .download-button {
+    background-color: #ffc107;
+  }
+  .download-button:hover {
+    background-color: #e0a800;
+  }
+  .clear-button {
+    background-color: #dc3545;
+  }
+  .clear-button:hover {
+    background-color: #c82333;
+  }
+  h2 {
+    margin-top: 20px;
+    color: #333;
+  }
+  pre {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .notification {
+    margin-top: 10px;
+    color: #28a745;
+    font-weight: bold;
+  }
+  .instructions {
+    margin-left: 20px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: sticky;
+    top: 20px;
+  }
+  .error {
+    margin-top: 10px;
+    color: #dc3545;
+    font-weight: bold;
+  }

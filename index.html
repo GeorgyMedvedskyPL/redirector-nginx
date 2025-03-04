@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Генератор редиректов для Nginx</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="fav.ico" type="image/x-icon">
+  </head>
+  <body>
+    <div>
+      <h1>Генератор редиректов для Nginx</h1>
+      <textarea
+        id="inputUrls"
+        rows="10"
+        placeholder="Введите адреса, по одному на строку..."
+      ></textarea>
+      <label for="targetUrl">Введите целевой URL:</label>
+      <input
+        type="text"
+        id="targetUrl"
+        placeholder="https://example.com/target"
+      />
+      <button id="generateButton">Сгенерировать редиректы</button>
+      <button id="copyButton" class="copy-button">Скопировать вывод</button>
+      <button id="downloadButton" class="download-button">
+        Скачать redirects.conf
+      </button>
+      <button id="clearButton" class="clear-button">Очистить все</button>
+      <h2>Результат:</h2>
+      <div id="notification" class="notification"></div>
+      <div id="error" class="error"></div>
+      <pre id="output"></pre>
+    </div>
+    <div class="instructions">
+      <h2>Инструкция</h2>
+      <p>1. Введите адреса, по одному на строку, в текстовое поле.</p>
+      <p>2. Укажите целевой URL, на который будут перенаправлены запросы.</p>
+      <p>3. Нажмите "Сгенерировать редиректы", чтобы получить конфигурацию.</p>
+      <p>4. Скопируйте вывод или скачайте файл <code>redirects.conf</code>.</p>
+      <p>
+        5. Вы можете вставить сгенерированные редиректы прямо в конфигурацию
+        Nginx:
+      </p>
+      <pre>
+server {
+    ...
+    # тут редиректы
+}</pre
+      >
+      <p>
+        или добавить <code>redirects.conf</code> в корень проекта и прописать в
+        Nginx:
+      </p>
+      <pre>
+server {
+    ...
+    include /path/to/your/site/from/root/redirects.conf;
+}</pre
+      >
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
