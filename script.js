@@ -36,7 +36,7 @@ function generateNginxRedirects(urls, targetUrl) {
     if ([...params.keys()].length > 0) {
       let redirectConditionAdded = false;
       for (const [key, value] of params) {
-        const redirectCondition = `if ($args ~* "^${setShielding(key.toString())}(.*)$") {\n    return 301 $target_url_;\n}\n`;
+        const redirectCondition = `if ($args ~* "^${setShielding(key.toString())}=${setShielding(value.toString())}$") {\n    return 301 $target_url_;\n}\n`;
         if (!existingRedirects.has(redirectCondition)) {
           queryRedirects += redirectCondition;
           existingRedirects.add(redirectCondition);
