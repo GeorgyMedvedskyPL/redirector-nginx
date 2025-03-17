@@ -29,27 +29,31 @@ function generateNginxRedirects(urls, targetUrl) {
   let redirects;
 
   urls.forEach((url) => {
-    const parsedUrl = new URL(url);
-    const path = decodeURIComponent(parsedUrl.pathname).replaceAll(' ',  '\\s');
-    const params = parsedUrl.searchParams;
-
-    if ([...params.keys()].length > 0) {
-      let redirectConditionAdded = false;
-      for (const [key, value] of params) {
-        const redirectCondition = `if ($args ~* "^${setShielding(key.toString())}=${setShielding(value.toString())}(.*)$") {\n    return 301 $target_url_;\n}\n`;
-        if (!existingRedirects.has(redirectCondition)) {
-          queryRedirects += redirectCondition;
-          existingRedirects.add(redirectCondition);
-          redirectConditionAdded = true;
+    try {
+      const parsedUrl = new URL(url);
+      const path = decodeURIComponent(parsedUrl.pathname).replaceAll(' ',  '\\s');
+      const params = parsedUrl.searchParams;
+  
+      if ([...params.keys()].length > 0) {
+        let redirectConditionAdded = false;
+        for (const [key, value] of params) {
+          const redirectCondition = `if ($args ~* "^${setShielding(key.toString())}=${setShielding(value.toString())}(.*)$") {\n    return 301 $target_url_;\n}\n`;
+          if (!existingRedirects.has(redirectCondition)) {
+            queryRedirects += redirectCondition;
+            existingRedirects.add(redirectCondition);
+            redirectConditionAdded = true;
+          }
         }
+        if (redirectConditionAdded) return;
+      } else {
+        groupedRedirects[path] = [];
+        groupedRedirects[path].push(path);
+        redirects = Object.keys(groupedRedirects).map((path) => {
+          return `rewrite (?i)^${setShielding(path)}(.*)$ $target_url_ permanent;`;
+        });
       }
-      if (redirectConditionAdded) return;
-    } else {
-      groupedRedirects[path] = [];
-      groupedRedirects[path].push(path);
-      redirects = Object.keys(groupedRedirects).map((path) => {
-        return `rewrite (?i)^${setShielding(path)}(.*)$ $target_url_ permanent;`;
-      });
+    } catch (err) {
+      console.log(`Error: ${err.message}`);
     }
   });
 
