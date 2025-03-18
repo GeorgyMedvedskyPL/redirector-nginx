@@ -53,7 +53,7 @@ function generateNginxRedirects(urls, targetUrl) {
         });
       }
     } catch (err) {
-      console.log(`Error: ${err.message}`);
+      console.log(`Error: ${err.message}`, url);
     }
   });
 
