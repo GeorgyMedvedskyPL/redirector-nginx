@@ -7,6 +7,11 @@ const resetButton = getElement("#clearButton");
 const output = getElement("#output");
 const notification = getElement("#notification");
 const error = getElement("#error");
+const popupElements = {
+  POPUP: getElement('.popup'),
+  MESSAGE: getElement('.popup__message'),
+  CLOSE_BTN: getElement('.popup__close')
+};
 
 function getElement(selector) {
   return selector ? document.querySelector(selector) : null;
@@ -16,28 +21,65 @@ function setShielding(str) {
   return str.replace(/([.*+?^${}()|])/g, '\\$1');
 }
 
-function hasUpperCase(str) {
-  const regex = /[A-Z]/;
-  return regex.test(str);
+function getTemplateForSearch(key, value) {
+  const shieldedKey = setShielding(key);
+  const shieldedValue = setShielding(value);
+  const template = `if ($args ~* "^${shieldedKey}=${shieldedValue}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+  return template;
 }
+
+function getTemplateForUrl(path) {
+  const shieldedPath = setShielding(path);
+  const template = `rewrite (?i)^/${shieldedPath}(.*)$ $target_url_ permanent;`;
+  return template;
+}
+
+const excludedResults = [
+  'rewrite (?i)^/(.*)$ $target_url_ permanent;'
+];
+
+function openPopup(message, data) {
+  data.forEach(item => {
+    const str = document.createElement('p');
+    str.textContent = item;
+    popupElements.POPUP.appendChild(str);
+  });
+  popupElements.MESSAGE.textContent = message;
+  popupElements.POPUP.classList.add('popup_open');
+}
+
+function closePopup() {
+  popupElements.MESSAGE.textContent = '';
+  popupElements.POPUP.classList.remove('popup_open');
+}
+
+popupElements.CLOSE_BTN ? popupElements.CLOSE_BTN.addEventListener('click', closePopup) : null;
 
 function generateNginxRedirects(urls, targetUrl) {
   const targetUrlLine = `set $target_url_ ${targetUrl.trim()};\n\n`;
-  const groupedRedirects = {};
+  const groupedRedirects = new Set();
   const existingRedirects = new Set();
   let queryRedirects = '';
-  let redirects;
+  let redirects = null;
+  let subdomens = [];
 
-  urls.forEach((url) => {
+  urls.forEach(url => {
     try {
       const parsedUrl = new URL(url);
+      const canonical = new URL(targetUrl);
       const path = decodeURIComponent(parsedUrl.pathname).replaceAll(' ',  '\\s');
+      const clipPath = path.split('/')[1];
       const params = parsedUrl.searchParams;
+
+      if(parsedUrl.host !== canonical.host
+        && parsedUrl.host !== `www.${canonical.host}`
+      ) subdomens.push(parsedUrl.host);
   
       if ([...params.keys()].length > 0) {
         let redirectConditionAdded = false;
         for (const [key, value] of params) {
-          const redirectCondition = `if ($args ~* "^${setShielding(key.toString())}=${setShielding(value.toString())}(.*)$") {\n    return 301 $target_url_;\n}\n`;
+          const clipValue = value.split(/[\s\/]/)[0];
+          const redirectCondition = getTemplateForSearch(key, clipValue);
           if (!existingRedirects.has(redirectCondition)) {
             queryRedirects += redirectCondition;
             existingRedirects.add(redirectCondition);
@@ -46,10 +88,9 @@ function generateNginxRedirects(urls, targetUrl) {
         }
         if (redirectConditionAdded) return;
       } else {
-        groupedRedirects[path] = [];
-        groupedRedirects[path].push(path);
+        groupedRedirects[clipPath] = clipPath;
         redirects = Object.keys(groupedRedirects).map((path) => {
-          return `rewrite (?i)^${setShielding(path)}(.*)$ $target_url_ permanent;`;
+          return getTemplateForUrl(path);
         });
       }
     } catch (err) {
@@ -57,13 +98,12 @@ function generateNginxRedirects(urls, targetUrl) {
     }
   });
 
-  if (redirects && queryRedirects) {
-    return targetUrlLine + queryRedirects + '\n' + redirects.join('\n') + '\n';
-  } else if (redirects && !queryRedirects) {
-    return targetUrlLine + redirects.join('\n') + '\n';
-  } else if (!redirects && queryRedirects) {
-    return targetUrlLine + queryRedirects;
-  } else return '';
+  if(subdomens.length > 0) {
+    openPopup(`В приведенном списке адресов обнаружены поддомены:\n`, subdomens)
+  };
+
+  redirects = redirects.filter(item => !excludedResults.includes(item));
+  return targetUrlLine + queryRedirects + redirects.join('\n');
 }
 
 generateButton.addEventListener("pointerup", () => {
