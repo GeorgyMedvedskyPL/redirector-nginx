@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `rewrite (?i)^/${escapedPath}(.*)$ $target_url_ permanent;`;
   }
 
-  const excludedResults = ["rewrite (?i)^/(.*)$ $target_url_ permanent;"];
+  const excludedResults = ["rewrite (?i)^/(.*)$ $target_url_ permanent;", "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;"];
 
   function createPopup(message, type) {
     const popup = popupTemplate.querySelector(".popup").cloneNode(true);
