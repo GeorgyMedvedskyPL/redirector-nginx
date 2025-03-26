@@ -1,109 +1,162 @@
 body {
   position: relative;
-    font-family: "Arial", sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-  }
-  h1 {
-    color: #333;
-  }
-  textarea,
-  input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 16px;
-  }
-  button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-  }
-  button:hover {
-    background-color: #218838;
-  }
-  .copy-button {
-    background-color: #007bff;
-  }
-  .copy-button:hover {
-    background-color: #0056b3;
-  }
-  .download-button {
-    background-color: #ffc107;
-  }
-  .download-button:hover {
-    background-color: #e0a800;
-  }
-  .clear-button {
-    background-color: #dc3545;
-  }
-  .clear-button:hover {
-    background-color: #c82333;
-  }
-  h2 {
-    margin-top: 20px;
-    color: #333;
-  }
-  pre {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 4px;
-    overflow-x: auto;
-    white-space: pre-wrap;
-  }
-  .notification {
-    margin-top: 10px;
-    color: #28a745;
-    font-weight: bold;
-  }
-  .instructions {
-    margin-left: 20px;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    position: sticky;
-    top: 20px;
-  }
-  .error {
-    margin-top: 10px;
-    color: #dc3545;
-    font-weight: bold;
-  }
+  font-family: "Arial", sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+}
+
+h1 {
+  color: #333;
+}
+
+textarea,
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: .2s;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+.copy-button {
+  background-color: #007bff;
+}
+
+.copy-button:hover {
+  background-color: #0056b3;
+}
+
+.download-button {
+  background-color: #ffc107;
+}
+
+.download-button:hover {
+  background-color: #e0a800;
+}
+
+.clear-button {
+  background-color: #dc3545;
+}
+
+.clear-button:hover {
+  background-color: #c82333;
+}
+
+h2 {
+  margin-top: 20px;
+  color: #333;
+}
+
+pre {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+#output {
+  min-height: 50px;
+}
+
+.notification {
+  margin-top: 10px;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.instructions {
+  margin-left: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  position: sticky;
+  top: 20px;
+}
+
+.error {
+  margin-top: 10px;
+  color: #dc3545;
+  font-weight: bold;
+}
 
 .popup {
-  position: absolute;
+  position: fixed;
   top: 20px;
   right: -100%;
   border-radius: 10px;
   box-shadow: 0 0 10px 2px grey;
-  padding: 10px;
   background-color: #fff;
-  max-width: 50%;
+  width: 600px;
+  transition: 1s;
+  overflow: hidden;
 }
 
 .popup_open {
   right: 20px
 }
 
+.popup_type_error {
+  top: 65px;
+  z-index: 5;
+}
+
+.popup_type_first {
+  z-index: 10;
+}
+
+.popup_type_latest {
+  z-index: 4;
+  cursor: pointer;
+}
+
 .popup__close {
   position: absolute;
-  top: 5px;
+  top: 0;
   right: 5px;
-  padding: 2px;
+  padding: 3px;
   cursor: pointer;
   transition: .2s;
+  font-size: 26px;
+}
+
+.popup__content {
+  padding: 20px;
+}
+
+.popup__divider {
+  height: 30px;
+  width: 100%;
+}
+
+.popup__divider_warning {
+  background: #ffda05;
+}
+
+.popup__divider_error {
+  background: #ce0000;
 }
 
 @media(hover:hover) {

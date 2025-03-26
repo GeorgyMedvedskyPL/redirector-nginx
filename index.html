@@ -59,12 +59,24 @@ server {
 }</pre
       >
     </div>
-    <div class="popup">
+    <!-- <div class="popup">
       <div class="popup__divider"></div>
-      <p class="popup__message">Test</p>
+      <div class="popup__content">
+        <h3 class="popup__message"></h3>
+      </div>
       <span class="popup__close">&times;</span>
-    </div>
+    </div> -->
 
     <script src="script.js"></script>
+
+    <template id="popup">
+      <div class="popup">
+        <div class="popup__divider"></div>
+        <div class="popup__content">
+          <h3 class="popup__message"></h3>
+        </div>
+        <span class="popup__close">&times;</span>
+      </div>
+    </template>
   </body>
 </html>
