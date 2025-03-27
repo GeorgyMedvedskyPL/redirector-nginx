@@ -10,50 +10,61 @@ document.addEventListener("DOMContentLoaded", () => {
   const notification = document.querySelector("#notification");
   const error = document.querySelector("#error");
   const popupTemplate = document.querySelector("#popup").content;
+
   const popupType = {
     WARNING: "popup__divider_warning",
     ERROR: "popup__divider_error",
   };
-  const warningModal = createPopup(
-    `В приведенном списке адресов обнаружены поддомены:\n`,
-    popupType.WARNING
-  );
-  const errorModal = createPopup(
-    `Невозможно обработать следующие адреса:\n`,
-    popupType.ERROR
-  );
-  let subdomains = [];
+
+  const modals = {
+    warning: createPopup(`В приведенном списке адресов обнаружены поддомены:\n`, popupType.WARNING),
+    error: createPopup(`Невозможно обработать следующие адреса:\n`, popupType.ERROR)
+  };
+
   let errors = [];
+  let subdomains = [];
+
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+  }
 
   function escapeRegExp(str) {
     return str.replace(/([.*+?^${}()|])/g, "\\$1");
   }
 
-  function createRedirectTemplate(key, value) {
-    const escapedKey = escapeRegExp(key);
-    const escapedValue = escapeRegExp(value);
-    return `if ($args ~* "^${escapedKey}=${escapedValue}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+  function queryRedirectTemplate(key, value) {
+    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
-  function createUrlTemplate(path) {
-    const escapedPath = escapeRegExp(path);
-    return `rewrite (?i)^/${escapedPath}(.*)$ $target_url_ permanent;`;
+  function defaultRedirectTemplate(path, isCutted) {
+    return `rewrite (?i)^/${escapeRegExp(path)}${isCutted ? '(.*)' : '/?'}$ $target_url_ permanent;`;
   }
 
-  const excludedResults = ["rewrite (?i)^/(.*)$ $target_url_ permanent;", "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;"];
+  const excludedResults = [
+    "rewrite (?i)^/(.*)$ $target_url_ permanent;",
+    "rewrite (?i)^//?$ $target_url_ permanent;",
+    "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;",
+  ];
 
   function createPopup(message, type) {
     const popup = popupTemplate.querySelector(".popup").cloneNode(true);
+    const id = generateUUID();
     const divider = popup.querySelector(".popup__divider");
     const closeBtn = popup.querySelector(".popup__close");
     const title = popup.querySelector(".popup__message");
 
+    popup.setAttribute('id', id);
     title.textContent = message;
     divider.classList.add(type);
-
     closeBtn.addEventListener("click", () => closePopup(popup));
 
-    type === popupType.ERROR ? popup.classList.add("popup_type_error") : null;
+    if (type === popupType.ERROR) {
+      popup.classList.add("popup_type_error");
+    }
 
     body.appendChild(popup);
     return popup;
@@ -61,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openPopup(popup, data) {
     const content = popup.querySelector(".popup__content");
-
     if (!popup.classList.contains("popup_open")) {
       data.forEach((item) => {
         const str = document.createElement("p");
@@ -83,58 +93,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateNginxRedirects(urls, targetUrl) {
     const targetUrlLine = `set $target_url_ ${targetUrl.trim()};\n\n`;
-    const groupedRedirects = new Set();
+    const groupedRedirects = new Map();
     const existingRedirects = new Set();
     let queryRedirects = "";
-
-    urls.forEach((url) => {
+  
+    urls.forEach(url => {
       try {
         const parsedUrl = new URL(url);
         const canonical = new URL(targetUrl);
-        const path = decodeURIComponent(parsedUrl.pathname).replaceAll(
-          " ",
-          "\\s"
-        );
-        const clipPath = path.split("/")[1];
+        const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
+        const segments = path.split("/").filter(Boolean);
+
         const params = parsedUrl.searchParams;
 
-        if (
-          parsedUrl.host !== canonical.host &&
-          parsedUrl.host !== `www.${canonical.host}`
-        ) {
+        if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.push(parsedUrl.host);
         }
 
         if ([...params.keys()].length > 0) {
-          let redirectConditionAdded = false;
           for (const [key, value] of params) {
             const clipValue = value.split(/[\s\/]/)[0];
-            const redirectCondition = createRedirectTemplate(key, clipValue);
+            const redirectCondition = queryRedirectTemplate(key, clipValue);
             if (!existingRedirects.has(redirectCondition)) {
               queryRedirects += redirectCondition;
               existingRedirects.add(redirectCondition);
-              redirectConditionAdded = true;
             }
           }
-          if (redirectConditionAdded) return;
-        } else {
-          groupedRedirects.add(clipPath);
+        } else if (segments.length > 0) {
+          const firstSegment = segments[0];
+          const isCutted = segments.length > 1;
+
+          if (groupedRedirects.has(firstSegment)) {
+            if (isCutted) {
+              groupedRedirects.set(firstSegment, true);
+            }
+          } else {
+            groupedRedirects.set(firstSegment, isCutted);
+          }
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
         errors.push(url);
       }
     });
-    const redirects = Array.from(groupedRedirects).map(createUrlTemplate);
-    const finalRedirects = redirects.filter(
-      (item) => !excludedResults.includes(item)
-    );
+  
+    const redirects = Array.from(groupedRedirects.entries()).map(([path, isCutted]) => defaultRedirectTemplate(path, isCutted));
+    const finalRedirects = redirects.filter(item => !excludedResults.includes(item));
     return targetUrlLine + queryRedirects + finalRedirects.join("\n");
   }
 
   generateButton.addEventListener("pointerup", () => {
     const targetUrlValue = targetUrl.value.trim();
-    const urls = urlsInput.value.split("\n").map((url) => url.trim());
+    const urls = urlsInput.value.split("\n").map(url => url.trim());
     error.textContent = "";
 
     if (!targetUrlValue) {
@@ -143,23 +153,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = generateNginxRedirects(urls, targetUrlValue);
       output.textContent = result;
 
-      if (subdomains.length > 0) openPopup(warningModal, subdomains);
-      if (errors.length > 0) openPopup(errorModal, errors);
+      if (subdomains.length > 0) openPopup(modals.warning, subdomains);
+      if (errors.length > 0) openPopup(modals.error, errors);
     }
   });
 
   copyButton.addEventListener("pointerup", () => {
-    navigator.clipboard
-      .writeText(output.textContent)
+    navigator.clipboard.writeText(output.textContent)
       .then(() => {
         notification.textContent = "Вывод скопирован в буфер обмена!";
-        setTimeout(() => {
-          notification.textContent = "";
-        }, 3000);
+        setTimeout(() => notification.textContent = "", 3000);
       })
-      .catch((err) => {
-        console.error("Ошибка при копировании: ", err);
-      });
+      .catch(err => console.error("Ошибка при копировании: ", err));
   });
 
   downloadButton.addEventListener("pointerup", () => {
@@ -178,5 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
     output.textContent = "";
     notification.textContent = "";
     error.textContent = "";
+    for(let key in modals) {
+      closePopup(modals[key]);
+    }
   });
 });
