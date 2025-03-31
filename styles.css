@@ -144,6 +144,22 @@ pre {
 
 .popup__content {
   padding: 20px;
+  overflow: scroll;
+  height: 70vh;
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(139, 139, 139);
+  border-radius: 20px;
+}
+
+.popup__content p {
+  word-wrap: break-word;
 }
 
 .popup__divider {

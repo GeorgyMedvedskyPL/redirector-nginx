@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
-        errors.add(url);
+        errors.add(`${url}\n\n`);
       }
     });
   
