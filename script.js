@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     error: createPopup(`Невозможно обработать следующие адреса:\n`, popupType.ERROR)
   };
 
-  let errors = [];
-  let subdomains = [];
+  let errors = new Set();
+  let subdomains = new Set();
 
   function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -84,8 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function closePopup(popup) {
     popup.classList.remove("popup_open");
-    subdomains = [];
-    errors = [];
+    subdomains.clear();
+    errors.clear();
     Array.from(popup.querySelectorAll('p')).forEach(element => {
       element.remove();
     });
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const params = parsedUrl.searchParams;
 
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
-          subdomains.push(parsedUrl.host);
+          subdomains.add(parsedUrl.host);
         }
 
         if ([...params.keys()].length > 0) {
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
-        errors.push(url);
+        errors.add(url);
       }
     });
   
@@ -152,9 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       const result = generateNginxRedirects(urls, targetUrlValue);
       output.textContent = result;
-
-      if (subdomains.length > 0) openPopup(modals.warning, subdomains);
-      if (errors.length > 0) openPopup(modals.error, errors);
+      if (subdomains.size > 0) openPopup(modals.warning, subdomains);
+      if (errors.size > 0) openPopup(modals.error, errors);
     }
   });
 
