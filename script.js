@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryRedirectTemplate(key, value) {
-    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}/(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
   function defaultRedirectTemplate(path, isCutted) {
