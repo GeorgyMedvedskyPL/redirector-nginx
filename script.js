@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notification = document.querySelector("#notification");
   const error = document.querySelector("#error");
   const popupTemplate = document.querySelector("#popup").content;
+  const templateSelect = document.querySelector("#templateSelect");
 
   const popupType = {
     WARNING: "popup__divider_warning",
@@ -36,12 +37,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return str.replace(/([.*+?^${}()|])/g, "\\$1");
   }
 
-  function queryRedirectTemplate(key, value) {
-    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}/(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+  function queryNginxTemplate(key, value) {
+    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
-  function defaultRedirectTemplate(path, isCutted) {
-    return `rewrite (?i)^/${escapeRegExp(path)}${isCutted ? '(.*)' : '/?'}$ $target_url_ permanent;`;
+  function queryApacheTemplate(key, value) {
+    return `RewriteCond %{QUERY_STRING} ^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$ [NC,OR]\n`;
+  }
+
+  function nginxTemplate(path, isCutted) {
+    return `rewrite (?i)^${escapeRegExp(path)}$ $target_url_ permanent;`;
+  }
+
+  function apacheTemplate(path, isLast) {
+    return `RewriteCond %{REQUEST_URI} ^${escapeRegExp(path)}$ [NC${isLast ? '' : ',OR'}]`;
   }
 
   const excludedResults = [
@@ -91,9 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
       element.remove();
     });
   }
+  
 
-  function generateNginxRedirects(urls, targetUrl) {
-    const targetUrlLine = `set $target_url_ ${targetUrl.trim()};\n\n`;
+  function generateRedirects(urls, targetUrl, template) {
+    const targetUrlLineForNginx = `set $target_url_ ${targetUrl.trim()};\n\n`;
+    const targetUrlLineForApache = `RewriteRule ^(.*)$ ${targetUrl.trim()} [R=301,L]\n\n`;
     const groupedRedirects = new Map();
     const existingRedirects = new Set();
     let queryRedirects = "";
@@ -103,34 +114,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const parsedUrl = new URL(url);
         const canonical = new URL(targetUrl);
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
-        const segments = path.split("/").filter(Boolean);
-
         const params = parsedUrl.searchParams;
-
+  
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
         }
-
+  
         if ([...params.keys()].length > 0) {
           for (const [key, value] of params) {
             const clipValue = value.split(/[\s\/]/)[0];
-            const redirectCondition = queryRedirectTemplate(key, clipValue);
+            let redirectCondition = null;
+
+            if(template === "nginx") {
+              redirectCondition = queryNginxTemplate(key, clipValue);
+            } else if (template === "apache") {
+              redirectCondition = queryApacheTemplate(key, clipValue);
+            }
+
             if (!existingRedirects.has(redirectCondition)) {
               queryRedirects += redirectCondition;
               existingRedirects.add(redirectCondition);
             }
           }
-        } else if (segments.length > 0) {
-          const firstSegment = segments[0];
-          const isCutted = segments.length > 1;
-
-          if (groupedRedirects.has(firstSegment)) {
-            if (isCutted) {
-              groupedRedirects.set(firstSegment, true);
-            }
-          } else {
-            groupedRedirects.set(firstSegment, isCutted);
-          }
+        } else {
+          groupedRedirects.set(path, true);
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
@@ -138,20 +145,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   
-    const redirects = Array.from(groupedRedirects.entries()).map(([path, isCutted]) => defaultRedirectTemplate(path, isCutted));
+    let redirects;
+    if (template === "nginx") {
+      redirects = Array.from(groupedRedirects.entries()).map(([path]) => nginxTemplate(path));
+    } else if (template === "apache") {
+      const redirectEntries = Array.from(groupedRedirects.entries());
+      redirects = redirectEntries.map(([path], index) => {
+        const isLast = index === redirectEntries.length - 1;
+        return apacheTemplate(path, isLast);
+      });
+    }
+  
     const finalRedirects = redirects.filter(item => !excludedResults.includes(item));
-    return targetUrlLine + queryRedirects + finalRedirects.join("\n");
+    if(template === "nginx") {
+      return targetUrlLineForNginx + queryRedirects + finalRedirects.join("\n");
+    } else if (template === "apache") {
+      return queryRedirects + finalRedirects.join("\n") + "\n" + targetUrlLineForApache;
+    }
   }
 
   generateButton.addEventListener("pointerup", () => {
     const targetUrlValue = targetUrl.value.trim();
     const urls = urlsInput.value.split("\n").map(url => url.trim());
     error.textContent = "";
-
+  
     if (!targetUrlValue) {
       error.textContent = "Пожалуйста, введите целевой URL";
     } else {
-      const result = generateNginxRedirects(urls, targetUrlValue);
+      const selectedTemplate = templateSelect.value;
+      const result = generateRedirects(urls, targetUrlValue, selectedTemplate);
       output.textContent = result;
       if (subdomains.size > 0) openPopup(modals.warning, subdomains);
       if (errors.size > 0) openPopup(modals.error, errors);
