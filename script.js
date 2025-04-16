@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const excludedResults = [
     "rewrite (?i)^/(.*)$ $target_url_ permanent;",
     "rewrite (?i)^//?$ $target_url_ permanent;",
+    "rewrite (?i)^/$ $target_url_ permanent;",
     "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;",
     "rewrite (?i)^/index\.php/?$ $target_url_ permanent;"
   ];
