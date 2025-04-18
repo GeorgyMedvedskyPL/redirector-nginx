@@ -58,7 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "rewrite (?i)^//?$ $target_url_ permanent;",
     "rewrite (?i)^/$ $target_url_ permanent;",
     "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;",
-    "rewrite (?i)^/index\.php/?$ $target_url_ permanent;"
+    "rewrite (?i)^/robots\.txt$ $target_url_ permanent;",
+    "rewrite (?i)^/robots\.txt/$ $target_url_ permanent;",
+    "rewrite (?i)^/sitemap\.xml$ $target_url_ permanent;",
+    "rewrite (?i)^/sitemap\.xml/$ $target_url_ permanent;",
   ];
 
   function createPopup(message, type) {
