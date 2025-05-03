@@ -96,6 +96,13 @@ pre {
   top: 20px;
 }
 
+.label {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
 .error {
   margin-top: 10px;
   color: #dc3545;

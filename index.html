@@ -33,11 +33,16 @@
       <pre id="output"></pre>
     </div>
     <div class="instructions">
-      <label for="templateSelect">Выберите шаблон:</label>
-      <select id="templateSelect">
-        <option value="nginx">Nginx</option>
-        <option value="apache">Apache</option>
-      </select>
+      <div class="tools">
+        <label for="templateSelect">Выберите шаблон:</label>
+        <select id="templateSelect">
+          <option value="nginx">Nginx</option>
+          <option value="apache">Apache</option>
+        </select>
+        <label class="label" for="group" title="Группировка будет осуществлена по родительской директории">Группировать
+          <input type="checkbox" name="group" id="group">
+        </label>
+      </div>
       <h2>Инструкция</h2>
       <p>1. Введите адреса, по одному на строку, в текстовое поле.</p>
       <p>2. Укажите целевой URL, на который будут перенаправлены запросы.</p>

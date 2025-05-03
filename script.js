@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const error = document.querySelector("#error");
   const popupTemplate = document.querySelector("#popup").content;
   const templateSelect = document.querySelector("#templateSelect");
+  const groupCheckbox = document.querySelector('#group');
 
   const popupType = {
     WARNING: "popup__divider_warning",
@@ -48,12 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return `RewriteCond %{QUERY_STRING} ^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$ [NC,OR]\n`;
   }
 
-  function nginxTemplate(path, isCutted) {
-    return `rewrite (?i)^${escapeRegExp(path)}$ $target_url_ permanent;`;
+  function nginxTemplate(path, isGrouped) {
+    return `rewrite (?i)^${escapeRegExp(path)}${isGrouped ? '/(.*)' : ''}$ $target_url_ permanent;`;
   }
 
-  function apacheTemplate(path, isLast) {
-    return `RewriteCond %{REQUEST_URI} ^${escapeRegExp(path)}$ [NC${isLast ? '' : ',OR'}]`;
+  function apacheTemplate(path, isLast, isGrouped) {
+    return `RewriteCond %{REQUEST_URI} ^${escapeRegExp(path)}${isGrouped ? '/(.*)' : ''}$ [NC${isLast ? '' : ',OR'}]`;
   }
 
   const excludedUrls = [
@@ -114,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetUrlLineForApache = `RewriteRule ^(.*)$ ${targetUrl.trim()} [R=301,L]\n\n`;
     const groupedRedirects = new Map();
     const existingRedirects = new Set();
+    const isGrouped = groupCheckbox.checked;
     let queryRedirects = "";
   
     urls.forEach(url => {
@@ -146,7 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         } else {
-          groupedRedirects.set(path, true);
+          isGrouped ? groupedRedirects.set(path.split('/')[1], true) : groupedRedirects.set(path, true);
+          // groupedRedirects.set(path, true);
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
@@ -156,12 +159,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
     let redirects;
     if (template === "nginx") {
-      redirects = Array.from(groupedRedirects.entries()).map(([path]) => nginxTemplate(path));
+      redirects = Array.from(groupedRedirects.entries()).map(([path]) => nginxTemplate(path, isGrouped));
     } else if (template === "apache") {
       const redirectEntries = Array.from(groupedRedirects.entries());
       redirects = redirectEntries.map(([path], index) => {
         const isLast = index === redirectEntries.length - 1;
-        return apacheTemplate(path, isLast);
+        return apacheTemplate(path, isLast, isGrouped);
       });
     }
 
