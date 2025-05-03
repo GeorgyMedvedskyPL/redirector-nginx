@@ -53,15 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return `RewriteCond %{REQUEST_URI} ^${escapeRegExp(path)}$ [NC${isLast ? '' : ',OR'}]`;
   }
 
-  const excludedResults = [
-    "rewrite (?i)^/(.*)$ $target_url_ permanent;",
-    "rewrite (?i)^//?$ $target_url_ permanent;",
-    "rewrite (?i)^/$ $target_url_ permanent;",
-    "rewrite (?i)^/index\.php(.*)$ $target_url_ permanent;",
-    "rewrite (?i)^/robots\.txt$ $target_url_ permanent;",
-    "rewrite (?i)^/robots\.txt/$ $target_url_ permanent;",
-    "rewrite (?i)^/sitemap\.xml$ $target_url_ permanent;",
-    "rewrite (?i)^/sitemap\.xml/$ $target_url_ permanent;",
+  const excludedUrls = [
+    '/',
+    '/index.php',
+    '/index.html',
+    '/sitemap.xml',
+    '/robots.txt'
   ];
 
   function createPopup(message, type) {
@@ -104,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
       element.remove();
     });
   }
-  
 
   function generateRedirects(urls, targetUrl, template) {
     const targetUrlLineForNginx = `set $target_url_ ${targetUrl.trim()};\n\n`;
@@ -119,6 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const canonical = new URL(targetUrl);
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
         const params = parsedUrl.searchParams;
+        
+        if (excludedUrls.includes(parsedUrl.pathname)) return;
   
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
@@ -159,12 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return apacheTemplate(path, isLast);
       });
     }
-  
-    const finalRedirects = redirects.filter(item => !excludedResults.includes(item));
+
     if(template === "nginx") {
-      return targetUrlLineForNginx + queryRedirects + finalRedirects.join("\n");
+      return targetUrlLineForNginx + queryRedirects + redirects.join("\n");
     } else if (template === "apache") {
-      return queryRedirects + finalRedirects.join("\n") + "\n" + targetUrlLineForApache;
+      return queryRedirects + redirects.join("\n") + "\n" + targetUrlLineForApache;
     }
   }
 
