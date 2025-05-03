@@ -38,7 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryNginxTemplate(key, value) {
-    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    if (excludedQuery.includes(key)) {
+      return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    }
+    return `if ($args ~* "^${escapeRegExp(key)}=(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
   function queryApacheTemplate(key, value) {
@@ -59,6 +62,10 @@ document.addEventListener("DOMContentLoaded", () => {
     '/index.html',
     '/sitemap.xml',
     '/robots.txt'
+  ];
+
+  const excludedQuery = [
+    'a'
   ];
 
   function createPopup(message, type) {
