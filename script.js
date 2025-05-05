@@ -124,8 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const canonical = new URL(targetUrl);
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
         const params = parsedUrl.searchParams;
-        
-        if (excludedUrls.includes(parsedUrl.pathname)) return;
   
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
@@ -148,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         } else {
+          if (excludedUrls.includes(parsedUrl.pathname)) return;
           isGrouped ? groupedRedirects.set(path.split('/')[1], true) : groupedRedirects.set(path, true);
           // groupedRedirects.set(path, true);
         }
