@@ -39,10 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryNginxTemplate(key, value) {
-    if (excludedQuery.includes(key)) {
-      return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
-    }
-    return `if ($args ~* "^${escapeRegExp(key)}=(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    // if (excludedQuery.includes(key)) {
+    // }
+    // return `if ($args ~* "^${escapeRegExp(key)}=(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
   function queryApacheTemplate(key, value) {
