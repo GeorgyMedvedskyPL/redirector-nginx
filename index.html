@@ -1,48 +1,53 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Генератор редиректов</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="shortcut icon" href="fav.ico" type="image/x-icon">
-  </head>
-  <body>
-    <div>
-      <h1>Генератор редиректов</h1>
-      <textarea
-        id="inputUrls"
-        rows="10"
-        placeholder="Введите адреса, по одному на строку..."
-      ></textarea>
-      <label for="targetUrl">Введите целевой URL:</label>
-      <input
-        type="text"
-        id="targetUrl"
-        placeholder="https://example.com/target"
-      />
-      <button id="generateButton">Сгенерировать редиректы</button>
-      <button id="copyButton" class="copy-button">Скопировать вывод</button>
-      <button id="downloadButton" class="download-button">
-        Скачать redirects.conf
-      </button>
-      <button id="clearButton" class="clear-button">Очистить все</button>
-      <h2>Результат:</h2>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirect Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="shortcut icon" href="fav.svg" type="image/x-icon">
+</head>
+
+<body>
+  <main class="container">
+    <section class="main">
+      <h1 class="title underline"><span class="title_accent">R</span>edirects <span class="title_accent">G</span>enerator</h1>
+      <textarea class="field" id="inputUrls" rows="8" placeholder="Enter addresses, one per line..."></textarea>
+      <h2 class="underline">Enter the target URL:</h2>
+      <input class="field" type="text" id="targetUrl" placeholder="https://example.com/target" />
+      <div class="buttons">
+        <button id="generateButton" class="button">Generate redirects</button>
+        <button id="copyButton" class="button">Copy</button>
+        <button id="downloadButton" class="button">
+          Download redirects.conf
+        </button>
+        <button id="clearButton" class="button">Reset all</button>
+      </div>
+      <h2 class="underline">Result:</h2>
       <div id="notification" class="notification"></div>
-      <div id="error" class="error"></div>
-      <pre id="output"></pre>
-    </div>
-    <div class="instructions">
-      <div class="tools">
-        <label for="templateSelect">Выберите шаблон:</label>
+      <p id="error" class="error"></p>
+      <pre class="field field_output" id="output"></pre>
+    </section>
+    <section class="tools">
+      <span class="tools__bookmark">
+        <img src="./arrow.svg">
+      </span>
+      <label class="label" for="templateSelect">
+        <span class="tools_name">Select a template:</span>
         <select id="templateSelect">
           <option value="nginx">Nginx</option>
           <option value="apache">Apache</option>
         </select>
-        <label class="label" for="group" title="Группировка будет осуществлена по родительской директории">Группировать
-          <input type="checkbox" name="group" id="group">
-        </label>
-      </div>
+      </label>
+
+      <label class="label" for="group" title="Группировка будет осуществлена по родительской директории">
+        <span class="tools_name">Group</span>
+        <input type="checkbox" name="group" id="group">
+      </label>
+    </section>
+  </main>
+  <!-- <div class="instructions">
       <h2>Инструкция</h2>
       <p>1. Введите адреса, по одному на строку, в текстовое поле.</p>
       <p>2. Укажите целевой URL, на который будут перенаправлены запросы.</p>
@@ -68,17 +73,20 @@ server {
     include /path/to/your/site/from/root/redirects.conf;
 }</pre
       >
-    </div>
-    <script src="script.js"></script>
+    </div> -->
+  <script src="script.js"></script>
 
-    <template id="popup">
-      <div class="popup">
-        <div class="popup__divider"></div>
-        <div class="popup__content scrollbar">
-          <h3 class="popup__message"></h3>
-        </div>
-        <span class="popup__close">&times;</span>
+  <template id="popup">
+    <div class="popup">
+      <div class="popup__divider"></div>
+      <div class="popup__content scrollbar">
+        <h3 class="popup__message"></h3>
       </div>
-    </template>
-  </body>
+      <span class="popup__close">
+        <svg width="25" height="25" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 30C8.268 30 2 23.73 2 16S8.268 2 16 2s14 6.27 14 14-6.268 14-14 14zm0-30C7.163 0 0 7.16 0 16s7.163 16 16 16 16-7.16 16-16S24.837 0 16 0zm5.717 10.28a1.014 1.014 0 0 0-1.425 0l-4.298 4.3-4.236-4.24a1 1 0 0 0-1.414 0 1.006 1.006 0 0 0 0 1.42l4.236 4.23-4.266 4.27a1.015 1.015 0 0 0 0 1.43c.394.39 1.032.39 1.426 0l4.266-4.27 4.236 4.24a1.002 1.002 0 1 0 1.415-1.42l-4.237-4.23 4.297-4.3c.393-.4.393-1.03 0-1.43z" fill="#fff" fill-rule="evenodd"/></svg>
+      </span>
+    </div>
+  </template>
+</body>
+
 </html>

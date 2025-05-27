@@ -12,6 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const popupTemplate = document.querySelector("#popup").content;
   const templateSelect = document.querySelector("#templateSelect");
   const groupCheckbox = document.querySelector('#group');
+  const tools = document.querySelector('.tools');
+  const toolsBookmark = tools.querySelector('.tools__bookmark');
+
+  toolsBookmark.addEventListener('pointerdown', () => {
+    if(!tools.classList.contains('tools_open')) {
+      tools.classList.add('tools_open');
+    } else {
+      tools.classList.remove('tools_open');
+    }
+  });
 
   const popupType = {
     WARNING: "popup__divider_warning",
@@ -19,8 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const modals = {
-    warning: createPopup(`В приведенном списке адресов обнаружены поддомены:\n`, popupType.WARNING),
-    error: createPopup(`Невозможно обработать следующие адреса:\n`, popupType.ERROR)
+    warning: createPopup(`The list of url's contains subdomains:\n`, popupType.WARNING),
+    error: createPopup(`It is not possible to process the following url's:\n`, popupType.ERROR)
   };
 
   let errors = new Set();
@@ -83,6 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (type === popupType.ERROR) {
       popup.classList.add("popup_type_error");
+    }
+
+    if (type === popupType.WARNING) {
+      popup.classList.add("popup_type_warning");
     }
 
     body.appendChild(popup);
@@ -180,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
     error.textContent = "";
   
     if (!targetUrlValue) {
-      error.textContent = "Пожалуйста, введите целевой URL";
+      error.textContent = "Please enter the target url";
     } else {
       const selectedTemplate = templateSelect.value;
       const result = generateRedirects(urls, targetUrlValue, selectedTemplate);
@@ -193,10 +207,10 @@ document.addEventListener("DOMContentLoaded", () => {
   copyButton.addEventListener("pointerup", () => {
     navigator.clipboard.writeText(output.textContent)
       .then(() => {
-        notification.textContent = "Вывод скопирован в буфер обмена!";
+        notification.textContent = "Copied!";
         setTimeout(() => notification.textContent = "", 3000);
       })
-      .catch(err => console.error("Ошибка при копировании: ", err));
+      .catch(err => console.error("Error while copying: ", err));
   });
 
   downloadButton.addEventListener("pointerup", () => {
