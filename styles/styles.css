@@ -1,13 +1,13 @@
 @font-face {
   font-family: 'ShareTech';
-  src: url('./ShareTech-Regular.ttf') format('truetype');
+  src: url('./vendor/ShareTech-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
 
 :root {
   --font-family-tech: 'ShareTech', sans-serif;
-  --body-background: url('./background.webp');
+  --body-background: url('/images/background.webp');
   --main-text-color: #cdcbcb;
   --accent-color: #0056b3;
 }
@@ -18,15 +18,32 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
   height: 100%;
-  margin: 0;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #8a8a8a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 10px;
 }
 
 body {
+  margin: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(rgba(0,0,0,9),rgba(0,0,0,.8)), var(--body-background) center / cover no-repeat;
+  background: linear-gradient(rgba(0,0,0,8),rgba(0,0,0,.7)), var(--body-background) center / cover no-repeat;
   color: #ffffffc0;
 }
 
@@ -36,6 +53,12 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 50px;
+  height: 100%;
+}
+
+.container_blur {
+  filter: blur(10px);
+  overflow: hidden;
 }
 
 @media screen and (width > 1280px) {
@@ -45,7 +68,10 @@ body {
 }
 
 .main {
-  width: 90%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .underline::after {
@@ -60,7 +86,7 @@ body {
 .title {
   font-family: var(--font-family-tech);
   color: var(--main-text-color);
-  font-size: 70px;
+  font-size: 60px;
   margin: 0;
 }
 
@@ -76,7 +102,6 @@ body {
   border: 1px solid var(--accent-color);
   border-radius: 5px;
   background: #202020;
-  box-sizing: border-box;
   font-size: 18px;
   outline: none;
   transition: .2s;
@@ -84,11 +109,17 @@ body {
   color: var(--main-text-color);
 }
 
+.field_output-container {
+  height: 100%;
+  overflow: auto;
+  flex-grow: 1;
+}
+
 .field_output {
   margin: 0;
-  min-height: 70px;
-  overflow-x: auto;
   white-space: pre-wrap;
+  height: 100%;
+  overflow: auto;
 }
 
 .field:focus {
@@ -121,8 +152,8 @@ body {
   background-color: #3d6897;
 }
 
-.button:focus {
-  box-shadow: 0 0 20px 1px var(--accent-color);
+.button:active {
+  transform: scale(0.9);
 }
 
 h2 {
@@ -130,7 +161,7 @@ h2 {
   font-weight: 700;
   margin: 20px 0 0;
   color: var(--main-text-color);
-  font-size: 36px;
+  font-size: 28px;
 }
 
 .notification {
@@ -151,6 +182,7 @@ h2 {
   border-radius: 10px;
   transition: .2s;
   border: 1px solid var(--accent-color);
+  color: inherit;
 }
 
 .tools__bookmark {
@@ -167,6 +199,13 @@ h2 {
   left: -50px;
   width: 50px;
   height: 100px;
+  transition: .2s;
+}
+
+.tools__bookmark:hover {
+  box-shadow: 0 0 20px 1px #3d6897;
+  background-color: #3d6897;
+  cursor: pointer;
 }
 
 .tools__bookmark img {
@@ -180,6 +219,7 @@ h2 {
 
 .tools_name {
   font-size: 20px;
+  color: inherit;
 }
 
 .label {
@@ -190,6 +230,12 @@ h2 {
   justify-content: space-between;
   margin-top: 10px;
   gap: 20px;
+  color: inherit;
+}
+
+a.label {
+  margin-top: 30px;
+  display: inline-block;;
 }
 
 .error {
@@ -248,16 +294,7 @@ h2 {
   padding: 20px;
   overflow: scroll;
   max-height: 70vh;
-}
-
-.scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-
-.scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgb(139, 139, 139);
-  border-radius: 20px;
+  overflow: auto;
 }
 
 .popup__message {
@@ -282,13 +319,44 @@ h2 {
   background: #ce0000;
 }
 
+.preloader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: .2s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.preloader__image {
+  display: block;
+  width: 100px;
+}
+
+.preloader_visible {
+  opacity: 1;
+  visibility: visible;
+}
+
 @media screen and (width <= 768px) {
+  .title {
+    font-size: 28px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  p {
+    margin: 0;
+  }
   .buttons {
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
   }
   .button {
     width: 100%;
+    padding: 5px 15px;
   }
   .tools {
     padding: 20px;
@@ -298,5 +366,8 @@ h2 {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+  .field {
+    font-size: 16px;
   }
 }

@@ -5,15 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Redirect Generator</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="shortcut icon" href="fav.svg" type="image/x-icon">
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="shortcut icon" href="/images/fav.svg" type="image/x-icon">
 </head>
 
 <body>
   <main class="container">
     <section class="main">
       <h1 class="title underline"><span class="title_accent">R</span>edirects <span class="title_accent">G</span>enerator</h1>
-      <textarea class="field" id="inputUrls" rows="8" placeholder="Enter addresses, one per line..."></textarea>
+      <textarea class="field" id="inputUrls" rows="10" placeholder="Enter addresses, one per line..."></textarea>
       <h2 class="underline">Enter the target URL:</h2>
       <input class="field" type="text" id="targetUrl" placeholder="https://example.com/target" />
       <div class="buttons">
@@ -27,11 +27,13 @@
       <h2 class="underline">Result:</h2>
       <div id="notification" class="notification"></div>
       <p id="error" class="error"></p>
-      <pre class="field field_output" id="output"></pre>
+      <div class="field_output-container">
+        <pre class="field field_output" id="output"></pre>
+      </div>
     </section>
     <section class="tools">
       <span class="tools__bookmark">
-        <img src="./arrow.svg">
+        <img src="/images/arrow.svg">
       </span>
       <label class="label" for="templateSelect">
         <span class="tools_name">Select a template:</span>
@@ -45,36 +47,16 @@
         <span class="tools_name">Group</span>
         <input type="checkbox" name="group" id="group">
       </label>
+
+      <a class="label" href="https://coolakov.ru/tools/ping/">
+        <span class="tools_name">Check redirect list</span>
+      </a>
     </section>
   </main>
-  <!-- <div class="instructions">
-      <h2>Инструкция</h2>
-      <p>1. Введите адреса, по одному на строку, в текстовое поле.</p>
-      <p>2. Укажите целевой URL, на который будут перенаправлены запросы.</p>
-      <p>3. Нажмите "Сгенерировать редиректы", чтобы получить конфигурацию.</p>
-      <p>4. Скопируйте вывод или скачайте файл <code>redirects.conf</code>.</p>
-      <p>
-        5. Вы можете вставить сгенерированные редиректы прямо в конфигурацию
-        Nginx:
-      </p>
-      <pre>
-server {
-    ...
-    # тут редиректы
-}</pre
-      >
-      <p>
-        или добавить <code>redirects.conf</code> в корень проекта и прописать в
-        Nginx:
-      </p>
-      <pre>
-server {
-    ...
-    include /path/to/your/site/from/root/redirects.conf;
-}</pre
-      >
-    </div> -->
-  <script src="script.js"></script>
+  <div class="preloader">
+    <img src="/images/preloader.png" alt="preloader" class="preloader__image">
+  </div>
+  <script src="/scripts/script.js"></script>
 
   <template id="popup">
     <div class="popup">

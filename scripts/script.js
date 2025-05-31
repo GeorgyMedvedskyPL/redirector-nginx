@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
+  const container = document.querySelector('.container');
   const urlsInput = document.querySelector("#inputUrls");
   const targetUrl = document.querySelector("#targetUrl");
   const generateButton = document.querySelector("#generateButton");
@@ -14,13 +15,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const groupCheckbox = document.querySelector('#group');
   const tools = document.querySelector('.tools');
   const toolsBookmark = tools.querySelector('.tools__bookmark');
+  const preloader = document.querySelector('.preloader');
+  let timer = null;
 
-  toolsBookmark.addEventListener('pointerdown', () => {
+  toolsBookmark.addEventListener('click', () => {
     if(!tools.classList.contains('tools_open')) {
       tools.classList.add('tools_open');
     } else {
       tools.classList.remove('tools_open');
     }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.tools')) {
+      tools.classList.remove('tools_open');
+      }
   });
 
   const popupType = {
@@ -48,8 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return str.replace(/([.*+?^${}()|])/g, "\\$1");
   }
 
-  function queryNginxTemplate(key, value) {
-    return `if ($args ~* "^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+  function queryNginxTemplate(key, value, isDecoded) {
+    return `if ($args ~* "^${escapeRegExp(key)}=${isDecoded ? '' : escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
     // if (excludedQuery.includes(key)) {
     // }
     // return `if ($args ~* "^${escapeRegExp(key)}=(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
@@ -138,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const canonical = new URL(targetUrl);
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
         const params = parsedUrl.searchParams;
+        const isDecoded = url !== decodeURIComponent(parsedUrl);
   
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
@@ -149,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let redirectCondition = null;
 
             if(template === "nginx") {
-              redirectCondition = queryNginxTemplate(key, clipValue);
+              redirectCondition = queryNginxTemplate(key, clipValue, isDecoded);
             } else if (template === "apache") {
               redirectCondition = queryApacheTemplate(key, clipValue);
             }
@@ -158,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
               queryRedirects += redirectCondition;
               existingRedirects.add(redirectCondition);
             }
+            break;
           }
         } else {
           if (excludedUrls.includes(parsedUrl.pathname)) return;
@@ -188,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  generateButton.addEventListener("pointerup", () => {
+  generateButton.addEventListener("click", () => {
     const targetUrlValue = targetUrl.value.trim();
     const urls = urlsInput.value.split("\n").map(url => url.trim());
     error.textContent = "";
@@ -198,13 +209,22 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       const selectedTemplate = templateSelect.value;
       const result = generateRedirects(urls, targetUrlValue, selectedTemplate);
-      output.textContent = result;
-      if (subdomains.size > 0) openPopup(modals.warning, subdomains);
-      if (errors.size > 0) openPopup(modals.error, errors);
+      if (timer) {
+        clearTimeout(timer);
+      }
+      preloader.classList.add('preloader_visible');
+      container.classList.add('container_blur');
+      timer = setTimeout(() => {
+        preloader.classList.remove('preloader_visible');
+        container.classList.remove('container_blur');
+        output.textContent = result;
+        if (subdomains.size > 0) openPopup(modals.warning, subdomains);
+        if (errors.size > 0) openPopup(modals.error, errors);
+      }, 2000);
     }
   });
 
-  copyButton.addEventListener("pointerup", () => {
+  copyButton.addEventListener("click", () => {
     navigator.clipboard.writeText(output.textContent)
       .then(() => {
         notification.textContent = "Copied!";
@@ -213,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error("Error while copying: ", err));
   });
 
-  downloadButton.addEventListener("pointerup", () => {
+  downloadButton.addEventListener("click", () => {
     const outputText = output.textContent;
     const blob = new Blob([outputText], { type: "text/plain" });
     const link = document.createElement("a");
@@ -223,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.URL.revokeObjectURL(link.href);
   });
 
-  resetButton.addEventListener("pointerup", () => {
+  resetButton.addEventListener("click", () => {
     urlsInput.value = "";
     targetUrl.value = "";
     output.textContent = "";
