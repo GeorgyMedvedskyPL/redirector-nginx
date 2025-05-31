@@ -1,13 +1,13 @@
 @font-face {
   font-family: 'ShareTech';
-  src: url('./vendor/ShareTech-Regular.ttf') format('truetype');
+  src: url('../vendor/ShareTech-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
 
 :root {
   --font-family-tech: 'ShareTech', sans-serif;
-  --body-background: url('./images/background.webp');
+  --body-background: url('../images/background.webp');
   --main-text-color: #cdcbcb;
   --accent-color: #0056b3;
 }
