@@ -1,3 +1,11 @@
+window.addEventListener('load', () => {
+  const preloader = document.querySelector('.preloader');
+  const container = document.querySelector('.container');
+
+  preloader.classList.remove('preloader_visible');
+  container.classList.remove('container_blur');
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
   const container = document.querySelector('.container');
