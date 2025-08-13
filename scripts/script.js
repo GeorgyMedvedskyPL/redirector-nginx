@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryApacheTemplate(key, value) {
-    return `RewriteCond %{QUERY_STRING} ^${escapeRegExp(key)}=${escapeRegExp(value)}(.*)$ [NC,OR]\n`;
+    return `RewriteCond %{QUERY_STRING} (^|&)${escapeRegExp(key)}=${escapeRegExp(value)}(&|$) [NC,OR]\n`;
   }
 
   function nginxTemplate(path, isGrouped) {
@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateRedirects(urls, targetUrl, template) {
     const targetUrlLineForNginx = `set $target_url_ ${targetUrl.trim()};\n\n`;
-    const targetUrlLineForApache = `RewriteRule ^(.*)$ ${targetUrl.trim()} [R=301,L]\n\n`;
+    const targetUrlLineForApache = `RewriteRule ^(.*)$ ${targetUrl.trim()}? [R=301,L]\n\n`;
     const groupedRedirects = new Map();
     const existingRedirects = new Set();
     const isGrouped = groupCheckbox.checked;
