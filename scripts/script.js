@@ -67,9 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function queryNginxTemplate(key, value, isDecoded) {
     return `if ($args ~* "^${escapeRegExp(key)}=${isDecoded ? '' : escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
-    // if (excludedQuery.includes(key)) {
-    // }
-    // return `if ($args ~* "^${escapeRegExp(key)}=(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
   function queryApacheTemplate(key, value) {
@@ -90,10 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
     '/index.html',
     '/sitemap.xml',
     '/robots.txt'
-  ];
-
-  const excludedQuery = [
-    'a'
   ];
 
   function createPopup(message, type) {
@@ -156,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
         const params = parsedUrl.searchParams;
         const isDecoded = url !== decodeURIComponent(parsedUrl);
-  
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
         }
@@ -180,8 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } else {
           if (excludedUrls.includes(parsedUrl.pathname)) return;
+          if (parsedUrl.pathname === canonical.pathname) return;
           isGrouped ? groupedRedirects.set(path.split('/')[1], true) : groupedRedirects.set(path, true);
-          // groupedRedirects.set(path, true);
         }
       } catch (err) {
         console.error(`Error: ${err.message}`, url);
