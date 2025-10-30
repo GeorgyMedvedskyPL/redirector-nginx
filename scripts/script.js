@@ -66,8 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryNginxTemplate(key, value, isDecoded) {
-    console.log(isDecoded);
-    return `if ($args ~* "^${escapeRegExp(key)}${isDecoded ? '' : '=' + escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
+    return `if ($args ~* "^${escapeRegExp(key)}${isDecoded ? '' : escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
   function queryApacheTemplate(key, value) {
@@ -149,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const canonical = new URL(targetUrl);
         const path = decodeURIComponent(parsedUrl.pathname).replaceAll(" ", "\\s");
         const params = parsedUrl.searchParams;
-        const isDecoded = url !== decodeURIComponent(parsedUrl);
+        const  = url !== decodeURIComponent(parsedUrl);
         if (parsedUrl.host !== canonical.host && parsedUrl.host !== `www.${canonical.host}`) {
           subdomains.add(parsedUrl.host);
         }
