@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function queryNginxTemplate(key, value, isDecoded) {
+    console.log(isDecoded);
     return `if ($args ~* "^${escapeRegExp(key)}${isDecoded ? '' : '=' + escapeRegExp(value)}(.*)$") {\n  return 301 $target_url_;\n}\n\n`;
   }
 
